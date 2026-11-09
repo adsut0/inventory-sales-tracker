@@ -49,3 +49,15 @@ The Ultrabin systems management program In this python application you will be a
 | oversell      | inventory["PRDT-003"]		| ValueError	  | ValueError: Rejected: requested 999 units of Milk (PRDT-003),
 		|  ["quantity"] -= 999				  | only 70 are available
 ================================================================================================================================
+
+
+=========Ultrabin Store Management Menu=========
+1. add product
+2. record a sale
+3. invetory report
+4. sales report 
+5. save 
+6. load
+7. quit
+
+# enter number to make your choice, i.e 1-5
