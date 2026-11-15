@@ -43,8 +43,8 @@ The Ultrabin systems management program In this python application you will be a
 |               |    '40', '10')
 ================================================================================================================================
 | blank name    | add_new_product("PRDT-004", ''| ValueError	  | ValueError: Validation Error: 
-		|, 'Groceries', '99.99.',	|		  | Product Name cannot be empty.
-		| '100', '10')			| 
+		        |, 'Groceries', '99.99.',	    |  		          | Product Name cannot be empty.
+	        	| '100', '10')			        | 
 ================================================================================================================================
 | oversell      | inventory["PRDT-003"]		| ValueError	  | ValueError: Rejected: requested 999 units of Milk (PRDT-003),
 		|  ["quantity"] -= 999				  | only 70 are available
