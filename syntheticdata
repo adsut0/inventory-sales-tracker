@@ -1,0 +1,26 @@
+# inventory = {
+#     "PRDT-001": {
+#         "name": "Grapes",
+#         "category": "Groceries",
+#         "unit_price": 3.49,
+#         "quantity": 40,
+#         "low_stock_threshold": 10,
+#         "active_status": True
+#     },
+#     "PRDT-002": {
+#         "name": "Apples",
+#         "category": "Groceries",
+#         "unit_price": 5.99,
+#         "quantity": 50,
+#         "low_stock_threshold": 7,
+#         "active_status": True
+#     },
+#     "PRDT-003": {
+#         "name": "Milk",
+#         "category": "Groceries",
+#         "unit_price": 6.99,
+#         "quantity": 70,
+#         "low_stock_threshold":15,
+#         "active_status": True
+#     }
+# }

@@ -1,7 +1,11 @@
 =====Project Charter=====
 
-The Ultrabin systems management program In this python application you will be able to add, manage and track and manage Customers, products, revue and employees.
-
+10/15 The Ultrabin systems management program In this python application you will be able to add, search, Restock, and sell products
+10/26 prototype finalized
+11/8 all applications for the ultrabin product management are in place and prototype is discarded
+10/15 Repeating command line menu to select management applications
+10/17 checkpoint normalisation should work as there dont seem to be any logic errors however i cannot record tests regarding such things until data can be recorded and saved in a json file
+commit number like 7 idk 
 ======SKU======
 | SKU      | Name   | Catagory  | Unit Price | Quantity  | Low-stock Threshold  | Active status |
 | PRDT-001 | Grapes | Groceries | 3.49       | 40        | 10                   | True |
@@ -29,35 +33,20 @@ The Ultrabin systems management program In this python application you will be a
 
 ~~**`Expected total: 3*3.49 = $10.47 (passes check)`**
 
-==Prototype tests (acceptance check)==
-| Test          | Input                         | Expected result | Actual result |
-================================================================================================================================
-| sale          | "PRDT-003", "Sale (20 units)" | successful sale | --- State After: Sale ( -20 units) ---
-                                                                    SKU: PRDT-003
-                                                                    Name: Milk
-                                                                    Quantity: 0 (Low Stock Alert: True)
-                                                                    Active Status: True
-================================================================================================================================
-| duplicate SKU | #add_new_product("PRDT-001",  | ValueError      | ValueError: Rejected: Product PRDT-001 Already Exists. 
-                | 'Grapes', 'Groceries', '3.49',|                 | Cannot create a duplicate
-|               |    '40', '10')
-================================================================================================================================
-| blank name    | add_new_product("PRDT-004", ''| ValueError	  | ValueError: Validation Error: 
-		        |, 'Groceries', '99.99.',	    |  		          | Product Name cannot be empty.
-	        	| '100', '10')			        | 
-================================================================================================================================
-| oversell      | inventory["PRDT-003"]		| ValueError	  | ValueError: Rejected: requested 999 units of Milk (PRDT-003),
-		|  ["quantity"] -= 999				  | only 70 are available
-================================================================================================================================
-
 
 =========Ultrabin Store Management Menu=========
-1. add product
-2. record a sale
-3. invetory report
-4. sales report 
-5. save 
-6. load
-7. quit
+1. Add product
+2. Product search
+3. Restocking
+4. Recording a sale
+5. Exit
 
 # enter number to make your choice, i.e 1-5
+1. Is to create a product with the SKU, name, category, price, quantity, low stock thresh hold, and the status of the product
+2. Simply enter the SKU of a product to search it in the system
+3. restocking system to add more stock to an existing product, 
+   just simply enter the sku of the product and the desired amount
+4. works just like restocking but in reverse,
+   when a sale is made, record it by entering the sku of the product and the amount sold
+5. does as it says just exits the program nice and cleanly
+
