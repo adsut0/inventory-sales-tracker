@@ -1,11 +1,40 @@
 # Menu and main functions
-inventory = {}
-#normalisations
+
+# Synthetic data only to be used until a permanent structure can be made
+inventory = {
+    "PRDT-001": {
+        "name": "Grapes",
+        "category": "Groceries",
+        "unit_price": 3.49,
+        "quantity": 40,
+        "low_stock_threshold": 10,
+        "active_status": True
+    },
+    "PRDT-002": {
+        "name": "Apples",
+        "category": "Groceries",
+        "unit_price": 5.99,
+        "quantity": 50,
+        "low_stock_threshold": 7,
+        "active_status": True
+    },
+    "PRDT-003": {
+        "name": "Milk",
+        "category": "Groceries",
+        "unit_price": 6.99,
+        "quantity": 70,
+        "low_stock_threshold":15,
+        "active_status": True
+    }
+}
+
+sales = []
+# normalisations
 
 def normalize_sku(sku):
     if not isinstance(sku,str):
         raise ValueError("Validation Error: SKU must start with text")
-    raise sku.strip().upper()
+    return sku.strip().upper()
 def normalize_text(text):
     if not isinstance(text, str):
         raise ValueError("ValidationError: Input must be text")
@@ -37,7 +66,7 @@ def validation_nonnegative_number(val, field_name=None):
     return val
 
 # product management functions
-
+# ADDING NEW PRODUCT
 def add_product(sku, name, category, unit_price, quantity, low_stock_threshold):
     clean_sku = validation(normalize_sku(sku), "SKU")
     if clean_sku in inventory:
@@ -58,6 +87,7 @@ def add_product(sku, name, category, unit_price, quantity, low_stock_threshold):
         "active_status": True
     }
 
+# RESTOCK
 
 def restock_product(sku, amount):
     clean_sku = validation(normalize_sku(sku), "SKU")
@@ -67,6 +97,37 @@ def restock_product(sku, amount):
     clean_amount = validation_positive_number(normalize_int(amount, "Restock Quantity"), "Restock Quantity")
     inventory[clean_sku]["quantity"] += clean_amount
 
+# PRODUCT UPDATE
+
+def update_product(sku, **updates):
+    clean_sku = validation(normalize_sku(sku), "SKU")
+    if clean_sku not in inventory:
+        raise KeyError(f"Product '{clean_sku}' not found.")
+
+
+    field_rules = {
+        "name": (normalize_text, validation, "Product Name"),
+        "category": (normalize_text, validation, "Category"),
+        "unit_price": (normalize_price, validation_positive_number, "Unit Price"),
+        "quantity": (normalize_int, validation_nonnegative_number, "Quantity"),
+        "low_stock_threshold": (normalize_int, validation_nonnegative_number, "Low Stock Threshold"),
+    }
+
+    validated_updates = {}
+    for field, value in updates.items():
+        if value is not None:
+            normalizer, validator, label = field_rules[field]
+            normalized_val = normalizer(value)
+            validated_updates[field] = validator(normalized_val, label)
+    validated_updates = {}
+    for field, value in updates.items():
+        if value is not None and field in field_rules:
+            normalizer, validator, label = field_rules[field]
+            normalized_val = normalizer(value)
+            validated_updates[field] = validator(normalized_val, label)
+    inventory[clean_sku].update(validated_updates)
+
+# SALE
 
 def record_sale(sku, amount):
     clean_sku = validation(normalize_sku(sku), "SKU")
@@ -96,6 +157,7 @@ def search_products(query):
 
     return results
 
+#PRINT
 
 def print_product_state(sku, event_name):
     clean_sku = sku.strip().upper()
@@ -112,17 +174,43 @@ def print_product_state(sku, event_name):
     print(f"Quantity: {p['quantity']} (Low Stock Alert: {is_low})")
     print(f"Active Status: {p['active_status']}\n")
 
-def process_sale_transaction(sku, requested_quantity):
-    if sku not in inventory:
-        raise KeyError(f"Rejected: '{sku}' does not exist")
-    requested_quantity = validation_positive_number(requested_quantity, "Requested quantity")
-    available_stock = inventory[sku]["quantity"]
+# INVENTORY, LOW STOCK, AND SALES REPORT
 
-    if requested_quantity > available_stock:
-        raise ValueError(
-            f"Rejected: requested {requested_quantity} units of {inventory[sku]['name']} ({sku}), "
-            f"only {available_stock} are available"
-        )
+def inventory_report(inventory):
+    print("\n--- COMPLETE INVENTORY ---")
+    total_value = 0
+    for sku, item in sorted(inventory.items()):
+        if item["active_status"]:
+            value = item["unit_price"] * item["quantity"]
+            total_value += value
+            print(f"{sku} | {item['name']} ({item['category']}) | ${item['unit_price']:.2f} | Qty: {item['quantity']} | Value: ${value:.2f}")
+    print(f"Total Inventory Value: ${total_value:.2f}")
+
+
+def low_stock_report(inventory):
+    print("\n--- LOW STOCK ALERTS ---")
+    found = False
+    for sku, item in sorted(inventory.items()):
+        if item["active_status"] and item["quantity"] <= item["low_stock_threshold"]:
+            found = True
+            print(f"{sku} | {item['name']} | Stock: {item['quantity']} (Threshold: {item['low_stock_threshold']})")
+    if not found:
+        print("No low-stock items.")
+
+
+def sales_report(sales):
+    print("\n--- SALES HISTORY ---")
+    if not sales:
+        print("No sales recorded yet.")
+        return
+
+    total_revenue = 0
+    for txn in sorted(sales, key=lambda x: x["timestamp"]):
+        total_revenue += txn["total_amount"]
+        print(f"{txn['timestamp']} | {txn['transaction_id']} | {txn['product_name']} x{txn['quantity_sold']} | ${txn['total_amount']:.2f}")
+    print(f"Total Revenue: ${total_revenue:.2f}")
+
+# command line menu
 
 while True:
     print("\n=========Ultrabin Store Management Menu=========")
@@ -130,7 +218,9 @@ while True:
     print("2. Product search")
     print("3. Restocking")
     print("4. Recording a sale")
-    print("5. Exit")
+    print("5. Product Update")
+    print("6. Product report")
+    print("7. Exit")
 
     choice = input("Enter your selection: ")
     try:
@@ -166,7 +256,31 @@ while True:
             amount = int(input("Enter quantity sold: "))
             record_sale(sku, amount)
 
+
         elif choice == "5":
+            sku = input("Enter SKU of product you would like to update: ")
+            print("!Leave any field blank and press Enter to keep its current value!.")
+            name = input("New product name: ").strip() or None
+            category = input("New category: ").strip() or None
+            price_str = input("New unit price: ").strip()
+            qty_str = input("New quantity: ").strip()
+            threshold_str = input("New low stock threshold: ").strip()
+            unit_price = float(price_str) if price_str else None
+            quantity = int(qty_str) if qty_str else None
+            low_stock_threshold = int(threshold_str) if threshold_str else None
+            update_product(
+                sku,
+                name=name,
+                category=category,
+                unit_price=unit_price,
+                quantity=quantity,
+                low_stock_threshold=low_stock_threshold,
+            )
+            print("Product updated successfully!")
+
+
+
+        elif choice == "7":
             print("Exiting Ultrabin Store Management Menu.")
             break
 
